@@ -65,7 +65,7 @@ export class Manager {
     console.log(this.cursor.x, this.cursor.y);
 
     for (let arrow of this.elementsToUpdate) {
-      arrow.rotateArrow(this.cursor.x, this.cursor.y);
+      arrow.applyTransformations(this.cursor.x, this.cursor.y)
     }
   };
 }
