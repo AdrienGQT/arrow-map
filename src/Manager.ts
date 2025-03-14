@@ -1,12 +1,14 @@
+import GUI from 'lil-gui'
 import { Arrow } from "./Arrow";
 
 export class Manager {
-  arrowQuantity: number;
+  arrowQuantity!: number;
   arrowSize: number = 42;
   gapSize: number = 8 * 2;
   arrowHTMLElement: HTMLElement;
   elementsToUpdate: Array<Arrow> = [];
   mapHTML: HTMLElement = document.querySelector(".map") as HTMLElement;
+  gui!: GUI
   sizes = {
     width: window.innerWidth,
     height: window.innerHeight,
@@ -18,12 +20,19 @@ export class Manager {
 
   constructor() {
     this.arrowHTMLElement = this.getArrowHTMLElement() as HTMLElement;
-    this.arrowQuantity = this.getArrowQuantity(
-      this.sizes.width,
-      this.sizes.height,
-      this.arrowSize
-    );
-    this.placeArrows(this.arrowQuantity);
+    this.updateScene()
+    this.initGUI()
+  }
+
+  initGUI = () => {
+    this.gui = new GUI()
+    this.gui.add(this, 'arrowSize', 10, 100, 1).name('Arrows size').onChange(() => {this.updateScene()})
+    this.gui.add(this, 'gapSize', 0, 100, 1).name('Gap size').onChange(() => {this.updateScene()})
+  }
+
+  updateScene = () => {
+    this.updateSizes()
+    this.placeArrows();
   }
 
   getArrowHTMLElement = () => {
@@ -38,9 +47,9 @@ export class Manager {
     return colQuantity * rowQuantity;
   };
 
-  placeArrows = (arrowQuantity: number) => {
+  placeArrows = () => {
     this.mapHTML.innerHTML = "";
-    for (let i = 0; i < arrowQuantity; i++) {
+    for (let i = 0; i < this.arrowQuantity; i++) {
       const arrowClone = this.arrowHTMLElement.cloneNode(true) as HTMLElement;
       const arrow = new Arrow(arrowClone);
       this.elementsToUpdate.push(arrow);
@@ -51,12 +60,13 @@ export class Manager {
   updateSizes = () => {
     this.sizes.height = window.innerHeight;
     this.sizes.width = window.innerWidth;
+    this.updateCSS()
     this.arrowQuantity = this.getArrowQuantity(
       this.sizes.width,
       this.sizes.height,
       this.arrowSize
     );
-    this.placeArrows(this.arrowQuantity);
+    this.placeArrows();
   };
 
   updateCursorPosition = (x: number, y: number) => {
@@ -68,4 +78,10 @@ export class Manager {
       arrow.applyTransformations(this.cursor.x, this.cursor.y)
     }
   };
+
+  updateCSS = () => {
+    this.arrowHTMLElement.style.width = `${this.arrowSize}px`
+    this.arrowHTMLElement.style.height = `${this.arrowSize}px`
+    this.arrowHTMLElement.style.padding = `${this.gapSize / 2}px`
+  }
 }
